@@ -9,12 +9,12 @@ public class TopManager implements Employee{
 
     @Override
     public double getMonthSalary() {
-        if (company.getIncome() > 10_000_000) {
-            return (int) (salary + salary * 1.5);
-        }
         return salary;
     }
     public TopManager(Company company) {
+        if (company.getIncome() > 10_000_00){
+            salary = salary + salary * 1.5;
+        }
         this.company = company;
     }
 
