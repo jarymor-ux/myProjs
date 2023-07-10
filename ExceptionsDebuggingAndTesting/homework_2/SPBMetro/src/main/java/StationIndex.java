@@ -8,7 +8,6 @@ public class StationIndex {
     private final Map<Integer, Line> number2line;
     private final TreeSet<Station> stations;
     private final Map<Station, TreeSet<Station>> connections;
-
     public StationIndex() {
         number2line = new HashMap<>();
         stations = new TreeSet<>();

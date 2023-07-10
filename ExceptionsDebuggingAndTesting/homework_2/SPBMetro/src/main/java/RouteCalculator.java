@@ -17,17 +17,23 @@ public class RouteCalculator {
 
     public List<Station> getShortestRoute(Station from, Station to) {
         List<Station> route = getRouteOnTheLine(from, to);
+        List<Station> minRoute = new ArrayList<>();
+
         if (route != null) {
             return route;
         }
 
         route = getRouteWithOneConnection(from, to);
-        if (route != null) {
-            return route;
+        if (!(route == null)) {
+            minRoute.addAll(route);
         }
 
         route = getRouteWithTwoConnections(from, to);
-        return route;
+        if (minRoute.isEmpty() || RouteCalculator.calculateDuration(route) < RouteCalculator.calculateDuration(minRoute)) {
+            minRoute.clear();
+            minRoute.addAll(route);
+        }
+        return minRoute;
     }
 
     public static double calculateDuration(List<Station> route) {
@@ -64,11 +70,11 @@ public class RouteCalculator {
                 route.add(station);
             }
 
-            if ((direction == 1 && station.equals(to)) ||
-                    (direction == -1 && station.equals(from))) {
+            if ((direction == 1 && station.equals(to)) || (direction == -1 && station.equals(from))) {
                 break;
             }
         }
+
         if (direction == -1) {
             Collections.reverse(route);
         }
@@ -97,6 +103,9 @@ public class RouteCalculator {
                 }
             }
         }
+        if (route.isEmpty()){
+            return null;
+        }
         return route;
     }
 
@@ -119,10 +128,6 @@ public class RouteCalculator {
     }
 
     private List<Station> getRouteWithTwoConnections(Station from, Station to) {
-        if (from.getLine().equals(to.getLine())) {
-            return null;
-        }
-
         ArrayList<Station> route = new ArrayList<>();
 
         List<Station> fromLineStations = from.getLine().getStations();
