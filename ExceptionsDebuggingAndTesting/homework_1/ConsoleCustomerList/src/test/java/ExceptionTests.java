@@ -59,8 +59,12 @@ public class ExceptionTests {
         final String email = "hello@skillbox.ru";
         final String phone = "+79991234567";
         final String input = String.join(" ", name, email, phone);
+        try {
+            storage.addCustomer(input);
+        } catch (Exception ex){
+            System.out.println(ex.getMessage());
+        }
 
-        storage.addCustomer(input);
         assertEquals(1, storage.getCount());
 
         Customer customer = storage.getCustomer(name);

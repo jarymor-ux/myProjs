@@ -1,6 +1,11 @@
 import java.util.Scanner;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 
 public class Main {
+    private static final Logger LOGGER = LogManager.getLogger(Main.class);
     private static final String ADD_COMMAND = "add Василий Петров " +
             "vasily.petrov@gmail.com +79215637722";
     private static final String COMMAND_EXAMPLES = "\t" + ADD_COMMAND + "\n" +
@@ -13,22 +18,36 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         CustomerStorage executor = new CustomerStorage();
 
-        while (true) {
+            while (true) {
             String command = scanner.nextLine();
             String[] tokens = command.split("\\s+", 2);
+            LOGGER.log(Level.INFO, command);
+            try {
+                switch (tokens[0]) {
+                    case "add":
+                        executor.addCustomer(tokens[1]);
+                        break;
+                    case "list":
+                        executor.listCustomers();
+                        break;
+                    case "remove":
+                        executor.removeCustomer(tokens[1]);
+                        break;
+                    case "count":
+                        System.out.println("There are " + executor.getCount() + " customers");
+                        break;
+                    case "help":
+                        System.out.println(helpText);
+                        break;
+                    default:
+                        LOGGER.log(Level.WARN, "Неизвестная команда " + tokens[0]);
+                        System.out.println(COMMAND_ERROR);
+                        break;
+                }
 
-            if (tokens[0].equals("add")) {
-                executor.addCustomer(tokens[1]);
-            } else if (tokens[0].equals("list")) {
-                executor.listCustomers();
-            } else if (tokens[0].equals("remove")) {
-                executor.removeCustomer(tokens[1]);
-            } else if (tokens[0].equals("count")) {
-                System.out.println("There are " + executor.getCount() + " customers");
-            } else if (tokens[0].equals("help")) {
-                System.out.println(helpText);
-            } else {
-                System.out.println(COMMAND_ERROR);
+            }catch (Exception ex){
+
+                System.out.println(ex.getMessage());
             }
         }
     }
