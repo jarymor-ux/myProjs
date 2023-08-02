@@ -1,37 +1,46 @@
+import entity.LinkedPurchaseList;
+import entity.LinkedPurchaseListKey;
+import entity.PurchasesList;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.hibernate.boot.Metadata;
-import org.hibernate.boot.MetadataSources;
-import org.hibernate.boot.registry.StandardServiceRegistry;
-import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
-import org.hibernate.cfg.Configuration;
+import org.hibernate.query.Query;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
 public class Main {
+    private static Logger logger = LogManager.getLogger(Main.class);
 
     public static void main(String[] args) {
-        SessionFactory sessionFactory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory();
-        Session session = sessionFactory.openSession();
-        Transaction transaction = session.beginTransaction();
 
-        String sql = "select student_id, course_id from Subscriptions";
+        logger = LogManager.getRootLogger();
+        Transaction transaction = null;
 
-        List<Object[]> keys = session.createNativeQuery(sql).list();
-        List<LinkedPurchaseList> purchaseList = new ArrayList<>();
-        for(Object[] key : keys) {
-            int studentId = (int) key[0];
-            int courseId = (int) key[1];
-            LinkedPurchaseList linkedPurchaseList = new LinkedPurchaseList(new LinkedPurchaseListKey(studentId, courseId));
-            purchaseList.add(linkedPurchaseList);
-            session.persist(linkedPurchaseList);
+        try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
+            transaction = session.beginTransaction();
+            List<PurchasesList> allPurchaseList = session.createQuery("From PurchasesList").getResultList();
+            for (PurchasesList purchasesList : allPurchaseList
+            ) {
+                Integer idStudent = purchasesList.getStudent().getId();
+                Integer idCourse = purchasesList.getCourse().getId();
+                LinkedPurchaseList linkedPurchaseList = session.get(LinkedPurchaseList.class,
+                        new LinkedPurchaseListKey(idStudent, idCourse));
+                logger.debug("debug");
+                if (linkedPurchaseList.getId() == null) {
+                    Query queryInsertIntoLinkedPurchaseList = session.createSQLQuery("INSERT INTO linked_purchase_list" +
+                            "(student_id,course_id)" +
+                            "VALUES " +
+                            "(" + idStudent + "," + idCourse + ");");
+                    queryInsertIntoLinkedPurchaseList.executeUpdate();
+                    logger.info("Test");
+                }
+            }
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            e.printStackTrace();
         }
-
-        transaction.commit();
-        session.close();
-        sessionFactory.close();
     }
 }
