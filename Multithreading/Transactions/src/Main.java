@@ -18,23 +18,32 @@ public class Main {
             threads += 1;
             thr.add(new Thread(() -> bank.transfer(from, to, random.nextLong(200, 52_000))));
         }
-        thr.get(0).start();
-        for (int i = 1; i < thr.size(); i++) {
+
+        long initialSum = bank.getSumAllAccounts();
+
+        for (Thread t : thr) {
+            t.start();
+        }
+
+        for (Thread t : thr) {
             try {
-                thr.get(i - 1).join();
-                thr.get(i).start();
+                t.join();
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
             }
         }
+        long finalSum = bank.getSumAllAccounts();
 
-        try {
-            thr.get(thr.size() - 1).join();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+        System.out.println("Начальная сумма денег на всех счетах: " + initialSum);
+        System.out.println("Конечная сумма денег на всех счетах: " + finalSum);
+
+        if (initialSum == finalSum) {
+            System.out.println("Суммы совпадают.");
+        } else {
+            System.out.println("Суммы не совпадают.");
         }
 
-        System.out.println("Запущено потоков: " + threads);
+        System.out.println("\n\n\n\n\nЗапущено потоков: " + threads);
         System.out.println("Попыток транзакций: " + bank.getTransactionAttempts());
         System.out.println("Успешных транзакций: " + bank.getSuccessfulTrans());
         System.out.println("Заблокировано подозрительных транзакций: " + bank.getBlockedSusTrans());
