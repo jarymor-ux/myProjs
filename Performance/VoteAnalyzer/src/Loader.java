@@ -23,7 +23,7 @@ public class Loader {
 
         parseFile(fileName);
 
-        //Printing results
+        
         System.out.println("Voting station work times: ");
         for (Integer votingStation : voteStationWorkTimes.keySet()) {
             WorkTime workTime = voteStationWorkTimes.get(votingStation);
