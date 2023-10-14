@@ -16,6 +16,11 @@ import java.util.Optional;
 public class Controller {
     @Autowired
     private TaskRepository taskRepository;
+
+    @GetMapping("/")
+    public String getTime(){
+        return LocalDateTime.now().toString();
+    }
     @PostMapping("/tasks")
     public ResponseEntity<Void> createTask(@RequestBody Task task) {
         task.setCreationTime(LocalDateTime.now());
